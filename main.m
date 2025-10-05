@@ -1,13 +1,28 @@
+set(0, 'DefaultAxesFontSize', 20);           % set axes font
+set(0, 'DefaultLineLineWidth', 2);
+figure(1);
+set(gcf, 'Position', [100, 100, 909, 600]);
 %%%text of quadratic functions
-%{
+
 mu = 1;
 L = 100;
-a=[mu,L];
+n = 100;
+%a = [mu,L];
+a = zeros(n,1);
+for i = 1:n
+    a(i) = exp(log(mu) + (i-1)/(n-1)*(log(L)-log(mu)));
+    %a(i) = mu+(i-1)/(n-1)*(L-mu);
+end
+%seed = 42;
+%rng(seed);
+[Q,~] = qr(randn(n));
 A=diag(a);
-n=2;
+A = Q*A*Q';
+
 
 %case: delta1 = 0,delta2 = 0
 x0 = ones(n,1);
+x0 = Q*x0;
 s = 1/L;
 delta1 = 0;
 delta2 = 0;
@@ -27,8 +42,9 @@ f1 = 1/2*y1'*A*y1;
 v = [norm(y1-y0)];
 %}
 f = [f0,f1];
+eps = 1e-6;
 %while abs(f1-f0) >= 1e-6 && norm(g1) >= 1e-8
-while norm(g1) >= 1e-6
+while norm(g1) >= eps
     temp = x1 + 1/(1+2*sqrt(mu*s))*(x1-x0-(1+delta1)*s*g1); 
     f0 = f1;
     x0 = x1;
@@ -59,10 +75,11 @@ hold on
 
 %case: delta1 = 0,delta2 > 0
 x0 = ones(n,1);
+x0 = Q*x0;
 s = 1/L;
 delta1 = 0;
-%delta2 = sqrt(s);
-delta2 = 2/3*sqrt(s);
+delta2 = sqrt(s);
+%delta2 = 2/3*sqrt(s);
 g0 = A*x0;
 %y0 = x0 - 1/L*g0;
 x1 = x0 - (1+delta1)/(1+2*sqrt(mu*s))*s*g0;
@@ -80,7 +97,7 @@ v = [norm(y1-y0)];
 %}
 f = [f0,f1];
 %while abs(f1-f0) >= 1e-6 && norm(g1) >= 1e-8
-while norm(g1) >= 1e-6
+while norm(g1) >= eps
     temp = x1 + 1/(1+2*sqrt(mu*s))*(x1-x0-(1+delta1)*s*g1-delta2*sqrt(s)*(g1-g0));
     f0 = f1;
     x0 = x1;
@@ -111,9 +128,10 @@ hold on
 
 %case: delta1 > 0,delta2 = 0
 x0 = ones(n,1);
+x0 = Q*x0;
 s = 1/L;
-delta1 = sqrt(mu*s);
-%delta1 = 1;
+%delta1 = sqrt(mu*s);
+delta1 = 1;
 delta2 = 0;
 g0 = A*x0;
 %y0 = x0 - 1/L*g0;
@@ -132,7 +150,7 @@ v = [norm(y1-y0)];
 %}
 f = [f0,f1];
 %while abs(f1-f0) >= 1e-6 && norm(g1) >= 1e-8
-while norm(g1) >= 1e-6
+while norm(g1) >= eps
     temp = x1 + 1/(1+2*sqrt(mu*s))*(x1-x0-(1+delta1)*s*g1); 
     f0 = f1;
     x0 = x1;
@@ -163,11 +181,12 @@ hold on
 
 %case: delta1 > 0, delta2 > 0
 x0 = ones(n,1);
+x0 = Q*x0;
 s = 1/L;
-delta1 = sqrt(mu*s);
-%delta1 = 1;
-%delta2 = sqrt(s);
-delta2 = 2/3*sqrt(s);
+%delta1 = sqrt(mu*s);
+delta1 = 1;
+delta2 = sqrt(s);
+%delta2 = 2/3*sqrt(s);
 g0 = A*x0;
 %y0 = x0 - 1/L*g0;
 x1 = x0 - (1+delta1)/(1+2*sqrt(mu*s))*s*g0;
@@ -185,7 +204,7 @@ v = [norm(y1-y0)];
 %}
 f = [f0,f1];
 %while abs(f1-f0) >= 1e-6 && norm(g1) >= 1e-8
-while norm(g1) >= 1e-6
+while norm(g1) >= eps
     temp = x1 + 1/(1+2*sqrt(mu*s))*(x1-x0-(1+delta1)*s*g1-delta2*sqrt(s)*(g1-g0));
     f0 = f1;
     x0 = x1;
@@ -216,6 +235,7 @@ hold on
 %NAG-SC
 
 x0 = ones(n,1);
+x0 = Q*x0;
 s = 1/L;
 y1 = x0;
 g0 = A*y1;
@@ -226,7 +246,7 @@ f1 = 1/2*y1'*A*y1;
 h = f1;
 %v = [];
 %while abs(f1-f0) >= 1e-6 && norm(g0) >= 1e-8
-while norm(g0) >= 1e-6
+while norm(g0) >= eps
     y0 = y1;
     y1 = x1+(1-sqrt(mu*s))/(1+sqrt(mu*s))*(x1-x0);
     x0 = x1;
@@ -244,54 +264,52 @@ while norm(g0) >= 1e-6
     h = [h,f1];  
 end
 
+
+
+%\hat{Delta}_1 = \sqrt{\mu s}, \hat{Delta}_2 = \sqrt{s}
+%{
 figure(1);
 semilogy(h,"black");
-legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    'NAG-SC', 'Interpreter','latex');
+legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\sqrt{s}$', ...
+    '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\sqrt{s}$', ...
+    'NAG-SC', 'Interpreter','latex','Position', [0.55, 0.55, 0.33, 0.33]);
 xlabel('iteration ($k$)', 'Interpreter','latex');
 ylabel('$\log_{10}(f(x_{k})-f(x^*))$','Interpreter','latex');
-hold off
-%{
-figure(2);
-semilogy(v,"black")
-legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    'NAG-SC', 'Interpreter','latex');
-xlabel('iteration ($k$)', 'Interpreter','latex');
-ylabel('$\|x_{k+1}-x_k\|$','Interpreter','latex');
+
 hold off
 %}
 
+%\hat{Delta}_1 = 1, \hat{Delta}_2 = \sqrt{s}
+
+figure(1);
+semilogy(h,"black");
+legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\sqrt{s}$', ...
+    '$\Delta_1=1,\Delta_2=0$','$\Delta_1=1,\Delta_2=\sqrt{s}$', ...
+    'NAG-SC', 'Interpreter','latex','Position', [0.55, 0.55, 0.33, 0.33]);
+xlabel('iteration ($k$)', 'Interpreter','latex');
+ylabel('$\log_{10}(f(x_{k})-f(x^*))$','Interpreter','latex');
+
+hold off
+
+
+%\hat{Delta}_1 = \sqrt{\mu s}, \hat{Delta}_2 = \frac{2}{3}\sqrt{s}
 %{
 figure(1);
 semilogy(h,"black");
 legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\frac{2}{3}\sqrt{s}$', ...
     '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    'NAG-SC', 'Interpreter','latex');
+    'NAG-SC', 'Interpreter','latex','Position', [0.55, 0.55, 0.33, 0.33]);
 xlabel('iteration ($k$)', 'Interpreter','latex');
-ylabel('$f(y_{k})-f(x^*)$','Interpreter','latex');
+ylabel('$\log_{10}(f(x_{k})-f(x^*))$','Interpreter','latex');
+
 hold off
-figure(2);
-semilogy(v,"black")
-legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    'NAG-SC', 'Interpreter','latex');
-xlabel('iteration ($k$)', 'Interpreter','latex');
-ylabel('$\|y_{k+1}-y_k\|$','Interpreter','latex');
-hold off
-%}
 %}
 
 
 
 %%%text of logistic regression
 %{
-'libsvmread' is a data reading program derived from the supplementary code 
-accompanying Professor Wen Zaiwen's textbook 《Optimization: Modeling,
-Algorithm and Theory》. The code repository is accessible at location 
-http://faculty.bicmr.pku.edu.cn/~wenzw/optbook/pages/contents/contents.html.
-%}
+
 %{
 dataset = 'a9a.test';
 [b,A] = libsvmread(dataset);
@@ -303,6 +321,7 @@ dataset = 'CINA.test';
 
 dataset = 'ijcnn1.test';
 [b,A] = libsvmread(dataset);
+
 
 [m,n] = size(A);
 mu = 1e-2;
@@ -436,8 +455,8 @@ hold on
 x0 = zeros(n,1);
 s = 1/L;
 delta1 = 0;
-%delta2 = sqrt(s);
-delta2 = 2/3*sqrt(s);
+delta2 = sqrt(s);
+%delta2 = 2/3*sqrt(s);
 g0 = zeros(n,1);
 for i = 1 : m
     g0 = g0 - 1/(1+exp(b(i)*A(i,:)*x0))*b(i)*A(i,:)';
@@ -521,8 +540,8 @@ hold on
 %case: delta1 > 0, delta2 = 0
 x0 = zeros(n,1);
 s = 1/L;
-%delta1 = 1;
-delta1 = sqrt(mu*s);
+delta1 = 1;
+%delta1 = sqrt(mu*s);
 delta2 = 0;
 g0 = zeros(n,1);
 for i = 1 : m
@@ -607,10 +626,10 @@ hold on
 %case: delta1 > 0, delta2 > 0
 x0 = zeros(n,1);
 s = 1/L;
-%delta1 = 1;
-delta1 = sqrt(mu*s);
-%delta2 = sqrt(s);
-delta2 = 2/3*sqrt(s);
+delta1 = 1;
+%delta1 = sqrt(mu*s);
+delta2 = sqrt(s);
+%delta2 = 2/3*sqrt(s);
 g0 = zeros(n,1);
 for i = 1 : m
     g0 = g0 - 1/(1+exp(b(i)*A(i,:)*x0))*b(i)*A(i,:)';
@@ -748,41 +767,43 @@ while norm(g0) >= 1e-6
     
     h = [h,f1];
 end
-
 figure(1);
-semilogy(h-f_opt,"black");
-legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    'NAG-SC', 'Interpreter','latex');
+semilogy(h-f_opt,"Color","black")
+hold on
+
+
+%\hat{Delta}_1 = \sqrt{\mu s}, \hat{Delta}_2 = \sqrt{s}
+%{
+legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\sqrt{s}$', ...
+    '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\sqrt{s}$', ...
+    'NAG-SC', 'Interpreter','latex','Position', [0.55, 0.55, 0.33, 0.33]);
 xlabel('iteration ($k$)', 'Interpreter','latex');
 ylabel('$\log_{10}(f(x_{k})-f(x^*))$','Interpreter','latex');
-hold off
-%{
-figure(2);
-semilogy(v,"black")
-legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    'NAG-SC', 'Interpreter','latex');
-xlabel('iteration ($k$)', 'Interpreter','latex');
-ylabel('$\|x_{k+1}-x_k\|$','Interpreter','latex');
+
 hold off
 %}
-%{
-figure(1);
-semilogy(h,"black");
-legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    'NAG-SC', 'Interpreter','latex');
+
+%\hat{Delta}_1 = 1, \hat{Delta}_2 = \sqrt{s}
+
+legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\sqrt{s}$', ...
+    '$\Delta_1=1,\Delta_2=0$','$\Delta_1=1,\Delta_2=\sqrt{s}$', ...
+    'NAG-SC', 'Interpreter','latex','Position', [0.55, 0.55, 0.33, 0.33]);
 xlabel('iteration ($k$)', 'Interpreter','latex');
-ylabel('$f(y_{k})-f(x^*)$','Interpreter','latex');
+ylabel('$\log_{10}(f(x_{k})-f(x^*))$','Interpreter','latex');
+
 hold off
-figure(2);
-semilogy(v,"black")
+
+
+%\hat{Delta}_1 = \sqrt{\mu s}, \hat{Delta}_2 = \frac{2}{3}\sqrt{s}
+%{
 legend('$\Delta_1=0,\Delta_2=0$','$\Delta_1=0,\Delta_2=\frac{2}{3}\sqrt{s}$', ...
     '$\Delta_1=\sqrt{\mu s},\Delta_2=0$','$\Delta_1=\sqrt{\mu s},\Delta_2=\frac{2}{3}\sqrt{s}$', ...
-    'NAG-SC', 'Interpreter','latex');
+    'NAG-SC', 'Interpreter','latex','Position', [0.55, 0.55, 0.33, 0.33]);
 xlabel('iteration ($k$)', 'Interpreter','latex');
-ylabel('$\|y_{k+1}-y_k\|$','Interpreter','latex');
+ylabel('$\log_{10}(f(x_{k})-f(x^*))$','Interpreter','latex');
+
 hold off
 %}
+%}
+
 
