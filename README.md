@@ -16,7 +16,8 @@ Ordinary Differential Equations".
 ## Getting Started
 
 ### Prerequisites
-- MATLAB
+
+MATLAB
 
 ### Usage
 1. Clone the repository
