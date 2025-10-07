@@ -20,12 +20,12 @@ This repository contains the implementation code for the numerical experiments p
 ### Usage
 1. Clone the repository
 2. Navigate to the directory and run in MATLAB:
-   - For testing on **quadratic functions**:
+   - Numerical experiments on convex quadratic programming:
      ```matlab
      main_quadratic
      ```
    
-   - For testing on **logistic regression functions**:
+   - Numerical experiments on $\ell_2$-regularized logistic regression problem:
      ```matlab
      main_nonquadratic
      ```
