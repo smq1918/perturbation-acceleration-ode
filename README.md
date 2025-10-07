@@ -7,11 +7,11 @@ Ordinary Differential Equations".
 
 | File/Folder          | Description                                                       |
 | -------------------- | ----------------------------------------------------------------- |
-| `main_quadratic.m`   | Core algorithm for tests on quadratic programming                |
-| `main_logistic.m`    | Core algorithm for tests on logistic regression                  |
-| `libsvmread.mexa64`  | Pre-compiled data reading utility for the Linux system           |
-| `libsvmread.mexw64`  | Pre-compiled data reading utility for the Windows system         |
-| `dataset/`           | Directory containing the experimental datasets                   |
+| `main_quadratic.m`   | Core algorithm for tests on quadratic programming                 |
+| `main_logistic.m`    | Core algorithm for tests on logistic regression                   |
+| `libsvmread.mexa64`  | Pre-compiled code for reading data on Linux                       |
+| `libsvmread.mexw64`  | Pre-compiled code for reading data on Windows                     |
+| `dataset/`           | Directory containing the datasets used in the tests               |
 
 ## Getting Started
 
